@@ -22,6 +22,13 @@
 <script type="module">
     import {ThreeEngine} from "../js/utils/utils_three.js";
     import {B1Z1Robot, XArm7Robot} from "../js/utils/utils_robot.js";
+    import {get_default_lil_gui, refresh_displays} from "../js/utils/utils_three.js";
+    import {
+        add_matrix_matrix,
+        mul_matrix_scalar,
+        mul_matrix_matrix,
+        identity_matrix
+    } from "../js/utils/utils_math.js";
 
     // todo: create a visualization that demonstrates your knowledge of forward kinematics on a robot model.
     // todo: The "default" assignment is to recreate this visualization:
@@ -43,8 +50,158 @@
     // this will spawn all of the robot's links at the origin
     robot.spawn_robot(engine);
 
-    engine.animation_loop( ()  => {
+    let links = robot.links;
+    let joints = robot.joints;
+    let kh = robot.kinematic_hierarchy;
 
+    let settings = {
+        dof0: 0.0,
+        dof1: 0.0,
+        dof2: 0.0,
+        dof3: 0.0,
+        dof4: 0.0,
+        dof5: 0.0,
+        dof6: 0.0,
+        dof7: 0.0,
+        link0: false,
+        link1: false,
+        link2: false,
+        link3: false,
+        link4: false,
+        link5: false,
+        link6: false,
+        link7: false,
+        link8: false,
+        link9: false,
+        link10: false,
+        link11: false,
+        link12: false,
+        link13: false,
+        link14: false,
+        link15: false,
+        link16: false,
+        link17: false
+    }
+
+    let actions = {
+        reset_dofs: function() {
+            settings.dof0 = 0.0;
+            settings.dof1 = 0.0;
+            settings.dof2 = 0.0;
+            settings.dof3 = 0.0;
+            settings.dof4 = 0.0;
+            settings.dof5 = 0.0;
+            settings.dof6 = 0.0;
+            settings.dof7 = 0.0;
+        },
+        select_all_links: function() {
+            settings.link0 = true;
+            settings.link1 = true;
+            settings.link2 = true;
+            settings.link3 = true;
+            settings.link4 = true;
+            settings.link5 = true;
+            settings.link6 = true;
+            settings.link7 = true;
+            settings.link8 = true;
+            settings.link9 = true;
+            settings.link10 = true;
+            settings.link11 = true;
+            settings.link12 = true;
+            settings.link13 = true;
+            settings.link14 = true;
+            settings.link15 = true;
+            settings.link16 = true;
+            settings.link17 = true;
+        },
+        deselect_all_links: function() {
+            settings.link0 = false;
+            settings.link1 = false;
+            settings.link2 = false;
+            settings.link3 = false;
+            settings.link4 = false;
+            settings.link5 = false;
+            settings.link6 = false;
+            settings.link7 = false;
+            settings.link8 = false;
+            settings.link9 = false;
+            settings.link10 = false;
+            settings.link11 = false;
+            settings.link12 = false;
+            settings.link13 = false;
+            settings.link14 = false;
+            settings.link15 = false;
+            settings.link16 = false;
+            settings.link17 = false;
+        }
+    }
+
+    let gui = get_default_lil_gui();
+    let gui_dofs = gui.addFolder("DOFs");
+    gui_dofs.add(settings, "dof0", joints[1].lower_bound, joints[1].upper_bound);
+    gui_dofs.add(settings, "dof1", joints[3].lower_bound, joints[3].upper_bound);
+    gui_dofs.add(settings, "dof2", joints[4].lower_bound, joints[4].upper_bound);
+    gui_dofs.add(settings, "dof3", joints[5].lower_bound, joints[5].upper_bound);
+    gui_dofs.add(settings, "dof4", joints[6].lower_bound, joints[6].upper_bound);
+    gui_dofs.add(settings, "dof5", joints[7].lower_bound, joints[7].upper_bound);
+    gui_dofs.add(settings, "dof6", joints[8].lower_bound, joints[8].upper_bound);
+    gui_dofs.add(settings, "dof7", joints[9].lower_bound, joints[9].upper_bound);
+    let gui_actions = gui.addFolder("Actions");
+    gui_actions.add(actions, "reset_dofs").name("Reset");
+    gui_actions.add(actions, "select_all_links").name("Select All Frames");
+    gui_actions.add(actions, "deselect_all_links").name("Deselect All Frames");
+    let gui_links = gui.addFolder("Links");
+    gui_links.add(settings, "link0");
+    gui_links.add(settings, "link1");
+    gui_links.add(settings, "link2");
+    gui_links.add(settings, "link3");
+    gui_links.add(settings, "link4");
+    gui_links.add(settings, "link5");
+    gui_links.add(settings, "link6");
+    gui_links.add(settings, "link7");
+    gui_links.add(settings, "link8");
+    gui_links.add(settings, "link9");
+    gui_links.add(settings, "link10");
+    gui_links.add(settings, "link11");
+    gui_links.add(settings, "link12");
+    gui_links.add(settings, "link13");
+    gui_links.add(settings, "link14");
+    gui_links.add(settings, "link15");
+    gui_links.add(settings, "link16");
+    gui_links.add(settings, "link17");
+
+    engine.animation_loop( ()  => {
+        let dofs_list = [
+            settings.dof0,
+            settings.dof1,
+            settings.dof2,
+            settings.dof3,
+            settings.dof4,
+            settings.dof5,
+            settings.dof6,
+            settings.dof7
+        ];
+        let links_list = [
+            settings.link0,
+            settings.link1,
+            settings.link2,
+            settings.link3,
+            settings.link4,
+            settings.link5,
+            settings.link6,
+            settings.link7,
+            settings.link8,
+            settings.link9,
+            settings.link10,
+            settings.link11,
+            settings.link12,
+            settings.link13,
+            settings.link14,
+            settings.link15,
+            settings.link16,
+            settings.link17
+        ]
+        refresh_displays(gui);
     });
 
 </script>
