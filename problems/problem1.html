@@ -80,7 +80,9 @@
         link14: false,
         link15: false,
         link16: false,
-        link17: false
+        link17: false,
+        link18: false,
+        link19: false
     }
 
     let actions = {
@@ -113,6 +115,8 @@
             settings.link15 = true;
             settings.link16 = true;
             settings.link17 = true;
+            settings.link18 = true;
+            settings.link19 = true;
         },
         deselect_all_links: function() {
             settings.link0 = false;
@@ -133,6 +137,8 @@
             settings.link15 = false;
             settings.link16 = false;
             settings.link17 = false;
+            settings.link18 = false;
+            settings.link19 = false;
         }
     }
 
@@ -169,6 +175,8 @@
     gui_links.add(settings, "link15");
     gui_links.add(settings, "link16");
     gui_links.add(settings, "link17");
+    gui_links.add(settings, "link18");
+    gui_links.add(settings, "link19");
 
     function scale_gizmos_axis(v) {
         return mul_matrix_scalar(v, 0.05);
@@ -319,7 +327,9 @@
             settings.link14,
             settings.link15,
             settings.link16,
-            settings.link17
+            settings.link17,
+            settings.link18,
+            settings.link19
         ]
         refresh_displays(gui);
 
