@@ -170,6 +170,43 @@
     gui_links.add(settings, "link16");
     gui_links.add(settings, "link17");
 
+    // Following the Pseudocode in Note Section 4.1.7
+    function forward_kinematics(dofs) {
+        let output_poses = [];
+        for(let i = 0; i < links.length; i++) {
+            output_poses.push(identity_matrix(4));
+        }
+        kh.forEach(layer => {
+            layer.forEach(link_idx =>{
+                if (link_idx !== 0) {
+                    let curr_link = links[link_idx];
+                    let parent_link_idx = curr_link.parent_link_idx;
+                    let parent_joint_idx = curr_link.parent_joint_idx;
+                    let curr_joint = joints[parent_joint_idx];
+                    let joint_type = curr_joint.joint_type_string;
+
+                    let T_i = output_poses[parent_link_idx];
+                    let T_c = curr_joint.xyz_rpy_SE3_matrix;
+                    let curr_pose = mul_matrix_matrix(T_i, T_c);
+
+                    let T_v;
+                    if (joint_type === "revolute") {
+                        let joint_value = dofs[curr_joint.dof_idx];
+                        T_v = identity_matrix(4);   // TODO
+                    } else if (joint_type === "prismatic") {
+                        let joint_value = dofs[curr_joint.dof_idx];
+                        T_v = identity_matrix(4);   // TODO
+                    } else {
+                        T_v = identity_matrix(4);
+                    }
+                    curr_pose = mul_matrix_matrix(curr_pose, T_v);
+                    output_poses[link_idx] = curr_pose;
+                }
+            })
+        })
+        return output_poses;
+    }
+
     engine.animation_loop( ()  => {
         let dofs_list = [
             settings.dof0,
@@ -202,6 +239,12 @@
             settings.link17
         ]
         refresh_displays(gui);
+
+        let poses = forward_kinematics(dofs_list);
+
+        for (let i = 0; i < robot.num_links(); i++) {
+            robot.set_link_mesh_pose_from_SE3_matrix(engine, i, poses[i]);
+        }
     });
 
 </script>
