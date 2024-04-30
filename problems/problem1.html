@@ -55,6 +55,9 @@
     let kh = robot.kinematic_hierarchy;
 
     let settings = {
+        disp_mesh: true,
+        disp_wf: false,
+        disp_mesh_frame: false,
         dof0: 0.0,
         dof1: 0.0,
         dof2: 0.0,
@@ -143,6 +146,9 @@
     }
 
     let gui = get_default_lil_gui();
+    gui.add(settings, "disp_mesh").name("Display Mesh");
+    gui.add(settings, "disp_wf").name("Display Wireframe");
+    gui.add(settings, "disp_mesh_frame").name("Display Mesh only with Frame");
     let gui_dofs = gui.addFolder("DOFs");
     gui_dofs.add(settings, "dof0", joints[1].lower_bound, joints[1].upper_bound);
     gui_dofs.add(settings, "dof1", joints[3].lower_bound, joints[3].upper_bound);
@@ -335,10 +341,17 @@
 
         let poses = forward_kinematics(dofs_list);
 
+        robot.set_mesh_visibility(engine, settings.disp_mesh);
+        robot.set_wireframe_visibility(engine, settings.disp_wf);
         for (let i = 0; i < robot.num_links(); i++) {
             robot.set_link_mesh_pose_from_SE3_matrix(engine, i, poses[i]);
             if (links_list[i]) {
                 draw_gizmos_from_SE3(poses[i]);
+            } else {
+                if (settings.disp_mesh_frame) {
+                    robot.set_link_mesh_visibility(engine, i, false);
+                    robot.set_link_wireframe_visibility(engine, i, false);
+                }
             }
         }
     });
